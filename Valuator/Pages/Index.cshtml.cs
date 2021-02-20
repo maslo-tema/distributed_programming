@@ -47,9 +47,17 @@ namespace Valuator.Pages
 
             string rankKey = "RANK-" + id;
             //TODO: посчитать rank и сохранить в БД по ключу rankKey
-            var countLetter = text.Where(x => Char.IsLetter(x)).Count();
-            double rank = (double)countLetter / text.Count();
-            _storage.Add(rankKey, rank.ToString());
+            //rank - доля НЕалфавитных символов в тексте
+            if (text != null)
+            {
+                var countNotLetter = text.Where(x => !(Char.IsLetter(x))).Count();
+                double rank = (double)countNotLetter / text.Count();
+                _storage.Add(rankKey, rank.ToString());
+            }
+            else
+            {
+                _storage.Add(rankKey, "0");
+            }
 
             return Redirect($"summary?id={id}");
         }
