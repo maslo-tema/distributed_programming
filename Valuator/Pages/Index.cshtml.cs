@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -21,9 +22,9 @@ namespace Valuator.Pages
 
         public void OnGet()
         {
-
+            //Console.WriteLine(Process.GetCurrentProcess().Id);
         }
-
+        
         public IActionResult OnPost(string text)
         {
             _logger.LogDebug(text);
