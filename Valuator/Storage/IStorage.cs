@@ -8,6 +8,8 @@ namespace Valuator
 
         string GetValue(string key);
 
-        bool Exist(string prefix, string value);
+        void AddInSet(string newKey, string value);
+        
+        bool ExistInSet(string newKey, string value);
     }
 }

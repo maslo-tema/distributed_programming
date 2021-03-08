@@ -8,13 +8,14 @@ namespace Valuator
     public class RedisStorage: IStorage
     {
         private readonly ILogger<RedisStorage> _logger;
-        private readonly IConnectionMultiplexer _connection;
+        private readonly IConnectionMultiplexer _connection = ConnectionMultiplexer.Connect("localhost, allowAdmin=true");
         private readonly IDatabase _db;
+        private readonly IServer _server;
         public RedisStorage(ILogger<RedisStorage> logger)
         {
             _logger = logger;
-            _connection = ConnectionMultiplexer.Connect("localhost, allowAdmin=true");
             _db = _connection.GetDatabase();
+            _server = _connection.GetServer("localhost", 6379);
 
         }
         public string GetValue(string key)
@@ -26,11 +27,14 @@ namespace Valuator
             _db.StringSet(key, value);
         }
 
-        public bool Exist(string prefix, string value)
+        public void AddInSet(string newKey, string value)
         {
-            var server = _connection.GetServer("localhost", 6379);
-            var values = server.Keys(pattern: "*" + prefix + "*").Select(x => GetValue(x)).ToList();
-            bool exist = values.Exists(x => x == value);
+            _db.SetAdd(newKey, value);
+        }
+
+        public bool ExistInSet(string newKey, string value)
+        {
+            bool exist = _db.SetContains(newKey, value);
             return exist;
         }
     }
