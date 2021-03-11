@@ -7,13 +7,11 @@ namespace Valuator
 {
     public class RedisStorage: IStorage
     {
-        private readonly ILogger<RedisStorage> _logger;
         private readonly IConnectionMultiplexer _connection = ConnectionMultiplexer.Connect("localhost, allowAdmin=true");
         private readonly IDatabase _db;
         private readonly IServer _server;
-        public RedisStorage(ILogger<RedisStorage> logger)
+        public RedisStorage()
         {
-            _logger = logger;
             _db = _connection.GetDatabase();
             _server = _connection.GetServer("localhost", 6379);
 

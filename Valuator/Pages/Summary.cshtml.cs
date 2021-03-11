@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Valuator.Pages
 {
@@ -27,8 +28,27 @@ namespace Valuator.Pages
             _logger.LogDebug(id);
 
             //TODO: проинициализировать свойства Rank и Similarity сохранёнными в БД значениями
-            Rank = Convert.ToDouble(_storage.GetValue("RANK-" + id));
+            Rank = GetValueRank(id);
             Similarity = Convert.ToDouble(_storage.GetValue("SIMILARITY-" + id));
+        }
+        public double GetValueRank(string id)
+        {
+            int counter, timeWaitText;
+            counter = 0;
+            timeWaitText = 60;
+            TimeSpan delayTime = TimeSpan.FromSeconds(0.01);
+            while (counter <= timeWaitText)
+            {
+                string rankKey = "RANK-" + id;
+                string rankString = _storage.GetValue(rankKey);
+                if (!String.IsNullOrWhiteSpace(rankString))
+                {
+                    return Convert.ToDouble(rankString);
+                }
+                counter++;
+                Thread.Sleep(delayTime);
+            }
+            return (double)0.0;
         }
     }
 }

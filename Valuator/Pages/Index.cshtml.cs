@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+// Reference the NATS client.
+using NATS.Client;
 
 namespace Valuator.Pages
 {
@@ -25,20 +29,6 @@ namespace Valuator.Pages
             //Console.WriteLine(Process.GetCurrentProcess().Id);
         }
         
-        private double CalculateRank(string text)
-        {
-            if (text != null)
-            {
-                var countNotLetter = text.Where(x => !(Char.IsLetter(x))).Count();
-                double rank = (double)countNotLetter / text.Count();
-                return rank;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
         private double CalculateSimilarity(string text)
         {
             if (_storage.ExistInSet("TEXT-", text))
@@ -51,6 +41,26 @@ namespace Valuator.Pages
             }
         }
 
+        private void CalculateRankInBroker(string id)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Task.Factory.StartNew(async () => await ProduceAsync(id), cts.Token);
+        }
+
+        private async Task ProduceAsync(string id)
+        {
+            ConnectionFactory cf = new ConnectionFactory();
+
+            using (IConnection c = cf.CreateConnection())
+            {
+                byte[] data = Encoding.UTF8.GetBytes(id);
+                c.Publish("rank", data);
+                await Task.Delay(1000);
+
+                c.Drain();
+                c.Close();
+            }
+        }
 
         public IActionResult OnPost(string text)
         {
@@ -68,11 +78,8 @@ namespace Valuator.Pages
             _storage.Add(textKey, text);
             _storage.AddInSet("TEXT-", text); //сохранить в множество только уникальный текст, который ранее не встречался, для ускорения поиска
 
-            string rankKey = "RANK-" + id;
-            //TODO: посчитать rank и сохранить в БД по ключу rankKey
-            //rank - доля НЕалфавитных символов в тексте
-            double rank = CalculateRank(text);
-            _storage.Add(rankKey, rank.ToString());
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Task.Factory.StartNew(() => CalculateRankInBroker(id), cts.Token);
 
             return Redirect($"summary?id={id}");
         }
