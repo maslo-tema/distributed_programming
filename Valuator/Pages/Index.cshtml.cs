@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 // Reference the NATS client.
 using NATS.Client;
+using Valuator.Events;
 
 namespace Valuator.Pages
 {
@@ -72,6 +74,7 @@ namespace Valuator.Pages
             //TODO: посчитать similarity и сохранить в БД по ключу similarityKey
             double similarity = CalculateSimilarity(text);
             _storage.Add(similarityKey, similarity.ToString());
+            PublishEventSimilarityCalculator(id, similarity);
 
             string textKey = "TEXT-" + id;
             //TODO: сохранить в БД text по ключу textKey
@@ -82,6 +85,23 @@ namespace Valuator.Pages
             Task.Factory.StartNew(() => CalculateRankInBroker(id), cts.Token);
 
             return Redirect($"summary?id={id}");
+        }
+        private void PublishEventSimilarityCalculator(string id, double similarity)
+        {
+            EventSimilarity similarityEvent = new EventSimilarity()
+            {
+                Id = id,
+                Similarity = similarity
+            };
+
+            ConnectionFactory cf = new ConnectionFactory();
+            using (IConnection c = cf.CreateConnection())
+            {
+                byte[] data = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(similarityEvent));
+                c.Publish("event-similarity", data);
+                c.Drain();
+                c.Close();
+            }
         }
     }
 }
