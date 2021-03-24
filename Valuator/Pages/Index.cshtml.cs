@@ -6,12 +6,13 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LibraryModule;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 // Reference the NATS client.
 using NATS.Client;
-using Valuator.Events;
+using LibraryModule.EventsModule;
 
 namespace Valuator.Pages
 {

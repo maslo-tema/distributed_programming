@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LibraryModule;
 using Valuator;
-using Valuator.Events;
+using LibraryModule.EventsModule;
 
 namespace RankCalculator
 {

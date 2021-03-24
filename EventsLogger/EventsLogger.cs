@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LibraryModule.EventsModule;
 using NATS.Client;
-using Valuator.Events;
 
 namespace EventsLogger
 {
