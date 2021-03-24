@@ -13,8 +13,8 @@ namespace RankCalculator
 {
     class RankCalculator
     {
-        private IConnection _connection;
-        private IAsyncSubscription _subscription;
+        private readonly IConnection _connection;
+        private readonly IAsyncSubscription _subscription;
         private readonly IStorage _storage = new RedisStorage();
 
         public RankCalculator()
