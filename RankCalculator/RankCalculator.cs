@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using LibraryModule;
-using Valuator;
 using LibraryModule.EventsModule;
 
 namespace RankCalculator
@@ -33,7 +32,7 @@ namespace RankCalculator
                 await PublishEventRankCalculator(id, rank);
             });
         }
-        public double RankCalculate(string text)
+        public static double RankCalculate(string text)
         {
             if (text != null)
             {
@@ -56,7 +55,7 @@ namespace RankCalculator
             _connection.Close();
         }
 
-        private async Task PublishEventRankCalculator(string id, double rank)
+        private static async Task PublishEventRankCalculator(string id, double rank)
         {
             EventRank rankEvent = new EventRank()
             {

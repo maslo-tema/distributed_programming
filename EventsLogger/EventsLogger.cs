@@ -11,7 +11,7 @@ namespace EventsLogger
 {
     public class EventsLogger
     {
-        private IConnection _connection = new ConnectionFactory().CreateConnection();
+        private readonly IConnection _connection = new ConnectionFactory().CreateConnection();
         private IAsyncSubscription _subscription;
 
         public void RunLogger()

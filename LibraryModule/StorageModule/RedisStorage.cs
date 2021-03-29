@@ -3,7 +3,7 @@ using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Valuator
+namespace LibraryModule
 {
     public class RedisStorage : IStorage
     {
