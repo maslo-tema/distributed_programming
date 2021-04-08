@@ -4,12 +4,16 @@ namespace LibraryModule
 {
     public interface IStorage
     {
-        void Add(string key, string value);
+        void Add(string key, string value, string id);
 
-        string GetValue(string key);
+        void AddShardKey(string id, string shardKey);
 
-        void AddInSet(string newKey, string value);
+        string GetValue(string key, string id);
+        
+        string GetShardKey(string id);
 
-        bool ExistInSet(string newKey, string value);
+        void AddInSet(string value, string id);
+
+        bool ExistInSet(string value);
     }
 }

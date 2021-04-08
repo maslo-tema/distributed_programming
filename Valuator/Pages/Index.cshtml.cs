@@ -34,7 +34,7 @@ namespace Valuator.Pages
         
         private double CalculateSimilarity(string text)
         {
-            if (_storage.ExistInSet("TEXT-", text))
+            if (_storage.ExistInSet(text))
             {
                 return (double)1.0;
             }
@@ -65,22 +65,25 @@ namespace Valuator.Pages
             }
         }
 
-        public IActionResult OnPost(string text)
+        public IActionResult OnPost(string text, string countryUser)
         {
-            _logger.LogDebug(text);
-
             string id = Guid.NewGuid().ToString();
+
+            _storage.AddShardKey(id, countryUser);
+
+            string shard = _storage.GetShardKey(id);
+            _logger.LogDebug($"LOOKUP Id: {id} Shard: {shard}");
 
             string similarityKey = "SIMILARITY-" + id;
             //TODO: посчитать similarity и сохранить в БД по ключу similarityKey
             double similarity = CalculateSimilarity(text);
-            _storage.Add(similarityKey, similarity.ToString());
+            _storage.Add(similarityKey, similarity.ToString(), id);
             PublishEventSimilarityCalculator(id, similarity);
 
             string textKey = "TEXT-" + id;
             //TODO: сохранить в БД text по ключу textKey
-            _storage.Add(textKey, text);
-            _storage.AddInSet("TEXT-", text); //сохранить в множество только уникальный текст, который ранее не встречался, для ускорения поиска
+            _storage.Add(textKey, text, id);
+            _storage.AddInSet(text, id); //сохранить в множество только уникальный текст, который ранее не встречался, для ускорения поиска
 
             CancellationTokenSource cts = new CancellationTokenSource();
             Task.Factory.StartNew(() => CalculateRankInBroker(id), cts.Token);

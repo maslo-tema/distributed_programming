@@ -26,11 +26,12 @@ namespace Valuator.Pages
 
         public void OnGet(string id)
         {
-            _logger.LogDebug(id);
+            string shard = _storage.GetShardKey(id);
+            _logger.LogDebug($"LOOKUP Id: {id} Shard: {shard}");
 
             //TODO: проинициализировать свойства Rank и Similarity сохранёнными в БД значениями
             Rank = GetValueRank(id);
-            Similarity = Convert.ToDouble(_storage.GetValue("SIMILARITY-" + id));
+            Similarity = Convert.ToDouble(_storage.GetValue("SIMILARITY-" + id, id));
         }
         public double GetValueRank(string id)
         {
@@ -41,7 +42,7 @@ namespace Valuator.Pages
             while (counter <= timeWaitText)
             {
                 string rankKey = "RANK-" + id;
-                string rankString = _storage.GetValue(rankKey);
+                string rankString = _storage.GetValue(rankKey, id);
                 if (!String.IsNullOrWhiteSpace(rankString))
                 {
                     return Convert.ToDouble(rankString);

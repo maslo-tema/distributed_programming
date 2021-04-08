@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
+using System;
 
 namespace RankCalculator
 {
@@ -6,7 +8,11 @@ namespace RankCalculator
     {
         static void Main(string[] args)
         {
-            var rank = new RankCalculator();
+            var loggerFactory = LoggerFactory.Create(builder => {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            });
+            var rank = new RankCalculator(new Logger<RankCalculator>(loggerFactory));
             rank.RunCount();
         }
     }

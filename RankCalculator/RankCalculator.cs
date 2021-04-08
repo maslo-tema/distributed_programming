@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using LibraryModule;
 using LibraryModule.EventsModule;
+using Microsoft.Extensions.Logging;
 
 namespace RankCalculator
 {
@@ -17,17 +18,20 @@ namespace RankCalculator
         private readonly IAsyncSubscription _subscription;
         private readonly IStorage _storage = new RedisStorage();
 
-        public RankCalculator()
+        public RankCalculator(ILogger<RankCalculator> _logger)
         {
             ConnectionFactory cf = new ConnectionFactory();
             _connection = cf.CreateConnection();
             _subscription = _connection.SubscribeAsync("rank", "rank-calculator", async (sender, args) =>
             {
                 string id = Encoding.UTF8.GetString(args.Message.Data);
-                var text = _storage.GetValue("TEXT-" + id);
+                var text = _storage.GetValue("TEXT-" + id, id);
                 string rankKey = "RANK-" + id;
                 var rank = RankCalculate(text);
-                _storage.Add(rankKey, rank.ToString());
+                _storage.Add(rankKey, rank.ToString(), id);
+
+                string shard = _storage.GetShardKey(id);
+                _logger.LogDebug($"LOOKUP Id: {id} Shard: {shard}");
 
                 await PublishEventRankCalculator(id, rank);
             });
