@@ -33,8 +33,15 @@ namespace Client
 
                     // RECEIVE
                     byte[] buf = new byte[1024];
-                    int bytesRec = sender.Receive(buf);
-                    List<string> history = JsonSerializer.Deserialize<List<string>>(Encoding.UTF8.GetString(buf, 0, bytesRec));
+                    StringBuilder dataBuilder = new StringBuilder();
+                    do
+                    {
+                        int bytesRec = sender.Receive(buf, buf.Length, 0);
+                        dataBuilder.Append(Encoding.UTF8.GetString(buf, 0, bytesRec));
+                    }
+                    while (sender.Available > 0);
+
+                    List<string> history = JsonSerializer.Deserialize<List<string>>(dataBuilder.ToString());
 
                     foreach (var message in history)
                     {
