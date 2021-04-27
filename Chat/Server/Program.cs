@@ -42,8 +42,13 @@ namespace Server
                     byte[] buf = new byte[1024];
 
                     // RECEIVE
-                    int bytesRec = handler.Receive(buf);
-                    string data = Encoding.UTF8.GetString(buf, 0, bytesRec);
+                    string data = null;
+                    do
+                    {
+                        int bytesRec = handler.Receive(buf);
+                        data += Encoding.UTF8.GetString(buf, 0, bytesRec);
+                    }
+                    while (handler.Available > 0);
 
                     _history.Add(data);
 
